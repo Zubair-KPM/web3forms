@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Modern Contact Form</title>
+</head>
+<body>
+
+    <form method="POST" id="form">
+        <h2>Contact Us</h2>
+
+        <input type="hidden" name="access_key" value="access key here">
+
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" placeholder="Enter your name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" placeholder="Enter your email" required>
+
+        <label for="message">Message:</label>
+        <textarea name="message" id="message" placeholder="Your message" required></textarea>
+
+        <div class="radio-group">
+            <label>Gender:</label>
+            <input type="radio" name="gender" value="male"> Male
+            <input type="radio" name="gender" value="female"> Female
+        </div>
+
+        <div class="checkbox-group">
+            <label>Choose:</label>
+            <input type="checkbox" name="choose" value="literate"> Literate
+            <input type="checkbox" name="choose" value="illiterate"> Illiterate
+        </div>
+
+        <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+
+        <button type="submit">Submit Form</button>
+
+        <div id="result"></div>
+
+    </form>
+
+    <script>
+        const form = document.getElementById('form');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
+
+            result.textContent = "Submitting...";
+            result.style.display = "block";
+            result.className = "";
+
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: json
+            })
+            .then(async (response) => {
+                const json = await response.json();
+                if (response.status === 200) {
+                    result.textContent = "Form submitted successfully!";
+                    result.classList.add('success');
+                } else {
+                    result.textContent = json.message;
+                    result.classList.add('error');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                result.textContent = "Something went wrong!";
+                result.classList.add('error');
+            })
+            .then(() => {
+                form.reset();
+                setTimeout(() => {
+                    result.style.display = "none";
+                }, 3000);
+            });
+        });
+    </script>
+
+</body>
+</html>
